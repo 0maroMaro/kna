@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Menu, X, Star, Heart, User, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 interface Product {
   id: string;
@@ -22,6 +23,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [cartItems, setCartItems] = useState<Array<{id: string, name: string, price: number, quantity: number}>>([]);
 
   useEffect(() => {
     fetchProducts();
@@ -54,8 +56,44 @@ const Index = () => {
     }
   };
 
-  const addToCart = () => {
+  const addToCart = (product: Product) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(item => item.id === product.id);
+      if (existingItem) {
+        return prev.map(item => 
+          item.id === product.id 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { 
+        id: product.id, 
+        name: product.name, 
+        price: product.price, 
+        quantity: 1 
+      }];
+    });
     setCartCount(prev => prev + 1);
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCartItems(prev => {
+      const item = prev.find(item => item.id === productId);
+      if (item && item.quantity > 1) {
+        setCartCount(prev => prev - 1);
+        return prev.map(item => 
+          item.id === productId 
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        );
+      }
+      setCartCount(prev => prev - (item?.quantity || 0));
+      return prev.filter(item => item.id !== productId);
+    });
+  };
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
   return (
@@ -67,7 +105,7 @@ const Index = () => {
             {/* Logo */}
             <div className="flex items-center space-x-3">
               <img 
-                src="/lovable-uploads/6fd16879-7281-4331-867d-8c1318e236ea.png" 
+                src="/lovable-uploads/ce257a3a-e907-444a-b331-b2e3222d93a0.png" 
                 alt="K&A Logo" 
                 className="h-10 w-10 object-contain"
               />
@@ -125,14 +163,76 @@ const Index = () => {
                 </Button>
               )}
               
-              <button className="relative p-2 text-white hover:text-red-600 transition-colors border border-white/20 rounded-full hover:border-red-600 hover:scale-110 transition-all duration-300">
-                <ShoppingCart className="h-6 w-6" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-red-600 text-white">
-                    {cartCount}
-                  </Badge>
-                )}
-              </button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button className="relative p-2 text-white hover:text-red-600 transition-colors border border-white/20 rounded-full hover:border-red-600 hover:scale-110 transition-all duration-300">
+                    <ShoppingCart className="h-6 w-6" />
+                    {cartCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-red-600 text-white">
+                        {cartCount}
+                      </Badge>
+                    )}
+                  </button>
+                </SheetTrigger>
+                <SheetContent className="bg-black text-white border-l border-white/10">
+                  <SheetHeader>
+                    <SheetTitle className="text-white">Shopping Cart</SheetTitle>
+                    <SheetDescription className="text-white/70">
+                      {cartItems.length === 0 ? 'Your cart is empty' : `${cartItems.length} item(s) in your cart`}
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-4">
+                    {cartItems.length === 0 ? (
+                      <div className="text-center py-8">
+                        <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-white/30" />
+                        <p className="text-white/70">Your cart is empty</p>
+                      </div>
+                    ) : (
+                      <>
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between p-4 border border-white/10 rounded-lg">
+                            <div>
+                              <h4 className="font-medium text-white">{item.name}</h4>
+                              <p className="text-white/70">${item.price.toFixed(2)} each</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => removeFromCart(item.id)}
+                                className="border-white/20 text-white hover:bg-white/20"
+                              >
+                                -
+                              </Button>
+                              <span className="text-white">{item.quantity}</span>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => {
+                                  const product = products.find(p => p.id === item.id);
+                                  if (product) addToCart(product);
+                                }}
+                                className="border-white/20 text-white hover:bg-white/20"
+                              >
+                                +
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="border-t border-white/10 pt-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-lg font-medium text-white">Total:</span>
+                            <span className="text-lg font-bold text-red-600">${getTotalPrice().toFixed(2)}</span>
+                          </div>
+                          <Button className="w-full bg-red-600 text-white hover:bg-red-700">
+                            Checkout
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
               
               <button
                 className="md:hidden p-2 text-white hover:text-red-600 transition-colors"
@@ -171,7 +271,7 @@ const Index = () => {
             {/* Logo in Hero */}
             <div className="flex justify-center mb-8">
               <img 
-                src="/lovable-uploads/6fd16879-7281-4331-867d-8c1318e236ea.png" 
+                src="/lovable-uploads/ce257a3a-e907-444a-b331-b2e3222d93a0.png" 
                 alt="K&A Logo" 
                 className="h-32 w-32 object-contain animate-pulse"
                 style={{filter: 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.5))'}}
@@ -276,7 +376,7 @@ const Index = () => {
                         Stock: {product.stock_quantity}
                       </span>
                       <Button 
-                        onClick={addToCart}
+                        onClick={() => addToCart(product)}
                         className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white border-0"
                         disabled={product.stock_quantity === 0}
                       >
@@ -327,7 +427,7 @@ const Index = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <img 
-                  src="/lovable-uploads/6fd16879-7281-4331-867d-8c1318e236ea.png" 
+                  src="/lovable-uploads/ce257a3a-e907-444a-b331-b2e3222d93a0.png" 
                   alt="K&A Logo" 
                   className="h-8 w-8 object-contain"
                 />
