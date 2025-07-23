@@ -103,7 +103,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-3 hover:scale-105 transition-transform duration-300">
               <img 
                 src="/lovable-uploads/ce257a3a-e907-444a-b331-b2e3222d93a0.png" 
                 alt="K&A Logo" 
@@ -112,26 +112,26 @@ const Index = () => {
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-red-600 bg-clip-text text-transparent tracking-wider">
                 K<span className="text-red-600">&</span>A
               </h1>
-            </div>
+            </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-white hover:text-red-600 transition-colors font-medium relative group">
+              <Link to="/new" className="text-white hover:text-red-600 transition-colors font-medium relative group">
                 New
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="#" className="text-white hover:text-red-600 transition-colors font-medium relative group">
+              </Link>
+              <Link to="/men" className="text-white hover:text-red-600 transition-colors font-medium relative group">
                 Men
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="#" className="text-white hover:text-red-600 transition-colors font-medium relative group">
+              </Link>
+              <Link to="/women" className="text-white hover:text-red-600 transition-colors font-medium relative group">
                 Women
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a href="#" className="text-white hover:text-red-600 transition-colors font-medium relative group">
+              </Link>
+              <Link to="/sale" className="text-white hover:text-red-600 transition-colors font-medium relative group">
                 Sale
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 transition-all duration-300 group-hover:w-full"></span>
-              </a>
+              </Link>
             </div>
 
             {/* User Actions */}
@@ -248,10 +248,10 @@ const Index = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-black border-t border-white/10">
             <div className="px-4 py-6 space-y-4">
-              <a href="#" className="block text-white hover:text-red-600 transition-colors font-medium">New</a>
-              <a href="#" className="block text-white hover:text-red-600 transition-colors font-medium">Men</a>
-              <a href="#" className="block text-white hover:text-red-600 transition-colors font-medium">Women</a>
-              <a href="#" className="block text-white hover:text-red-600 transition-colors font-medium">Sale</a>
+              <Link to="/new" className="block text-white hover:text-red-600 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>New</Link>
+              <Link to="/men" className="block text-white hover:text-red-600 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>Men</Link>
+              <Link to="/women" className="block text-white hover:text-red-600 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>Women</Link>
+              <Link to="/sale" className="block text-white hover:text-red-600 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>Sale</Link>
             </div>
           </div>
         )}
@@ -443,20 +443,20 @@ const Index = () => {
             <div>
               <h5 className="font-semibold mb-4 text-red-600">Quick Links</h5>
               <ul className="space-y-2 text-white/70">
-                <li><a href="#" className="hover:text-red-600 transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-red-600 transition-colors">Size Guide</a></li>
-                <li><a href="#" className="hover:text-red-600 transition-colors">Shipping</a></li>
-                <li><a href="#" className="hover:text-red-600 transition-colors">Returns</a></li>
+                <li><Link to="/page/about" className="hover:text-red-600 transition-colors">About Us</Link></li>
+                <li><Link to="/page/size-guide" className="hover:text-red-600 transition-colors">Size Guide</Link></li>
+                <li><Link to="/page/shipping" className="hover:text-red-600 transition-colors">Shipping</Link></li>
+                <li><Link to="/page/returns" className="hover:text-red-600 transition-colors">Returns</Link></li>
               </ul>
             </div>
             
             <div>
               <h5 className="font-semibold mb-4 text-red-600">Support</h5>
               <ul className="space-y-2 text-white/70">
-                <li><a href="#" className="hover:text-red-600 transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-red-600 transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-red-600 transition-colors">Track Order</a></li>
-                <li><a href="#" className="hover:text-red-600 transition-colors">Privacy Policy</a></li>
+                <li><Link to="/page/contact" className="hover:text-red-600 transition-colors">Contact Us</Link></li>
+                <li><Link to="/page/faq" className="hover:text-red-600 transition-colors">FAQ</Link></li>
+                <li><Link to="/page/track-order" className="hover:text-red-600 transition-colors">Track Order</Link></li>
+                <li><Link to="/page/privacy" className="hover:text-red-600 transition-colors">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
