@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Menu, X, User, Shield } from 'lucide-react';
 import { useState } from 'react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -11,6 +13,43 @@ interface PageLayoutProps {
 const PageLayout = ({ children }: PageLayoutProps) => {
   const { user, profile, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [cartItems, setCartItems] = useState<Array<{id: string, name: string, price: number, quantity: number}>>([]);
+
+  const addToCart = (productId: string, name: string, price: number) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(item => item.id === productId);
+      if (existingItem) {
+        return prev.map(item => 
+          item.id === productId 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { id: productId, name, price, quantity: 1 }];
+    });
+    setCartCount(prev => prev + 1);
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCartItems(prev => {
+      const item = prev.find(item => item.id === productId);
+      if (item && item.quantity > 1) {
+        setCartCount(prev => prev - 1);
+        return prev.map(item => 
+          item.id === productId 
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        );
+      }
+      setCartCount(prev => prev - (item?.quantity || 0));
+      return prev.filter(item => item.id !== productId);
+    });
+  };
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -65,7 +104,7 @@ const PageLayout = ({ children }: PageLayoutProps) => {
                       </Link>
                     </Button>
                   )}
-                  <Button variant="outline" onClick={signOut} size="sm" className="border-white/20 text-white hover:bg-white/20">
+                  <Button variant="outline" onClick={signOut} size="sm" className="border-white/20 text-white hover:bg-white/20 hover:text-black">
                     <User className="w-4 h-4 mr-2" />
                     Sign Out
                   </Button>
@@ -78,6 +117,74 @@ const PageLayout = ({ children }: PageLayoutProps) => {
                   </Link>
                 </Button>
               )}
+              
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button className="relative p-2 text-white hover:text-red-600 transition-colors border border-white/20 rounded-full hover:border-red-600 hover:scale-110 transition-all duration-300">
+                    <ShoppingCart className="h-6 w-6" />
+                    {cartCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-red-600 text-white">
+                        {cartCount}
+                      </Badge>
+                    )}
+                  </button>
+                </SheetTrigger>
+                <SheetContent className="bg-black text-white border-l border-white/10">
+                  <SheetHeader>
+                    <SheetTitle className="text-white">Shopping Cart</SheetTitle>
+                    <SheetDescription className="text-white/70">
+                      {cartItems.length === 0 ? 'Your cart is empty' : `${cartItems.length} item(s) in your cart`}
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-4">
+                    {cartItems.length === 0 ? (
+                      <div className="text-center py-8">
+                        <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-white/30" />
+                        <p className="text-white/70">Your cart is empty</p>
+                      </div>
+                    ) : (
+                      <>
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between p-4 border border-white/10 rounded-lg">
+                            <div>
+                              <h4 className="font-medium text-white">{item.name}</h4>
+                              <p className="text-white/70">${item.price.toFixed(2)} each</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => removeFromCart(item.id)}
+                                className="border-white/20 text-white hover:bg-white/20 hover:text-black min-w-[32px]"
+                              >
+                                -
+                              </Button>
+                              <span className="text-white min-w-[20px] text-center">{item.quantity}</span>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => addToCart(item.id, item.name, item.price)}
+                                className="border-white/20 text-white hover:bg-white/20 hover:text-black min-w-[32px]"
+                              >
+                                +
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="border-t border-white/10 pt-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-lg font-medium text-white">Total:</span>
+                            <span className="text-lg font-bold text-red-600">${getTotalPrice().toFixed(2)}</span>
+                          </div>
+                          <Button className="w-full bg-red-600 text-white hover:bg-red-700">
+                            Checkout
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
               
               {/* Mobile Menu Button */}
               <button

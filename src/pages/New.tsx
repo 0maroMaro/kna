@@ -30,7 +30,7 @@ const New = () => {
         .from('products')
         .select('*')
         .eq('is_active', true)
-        .eq('is_new', true)
+        .or('is_new.eq.true,product_type.eq.new')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

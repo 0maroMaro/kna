@@ -20,11 +20,16 @@ interface Product {
   slug: string;
   description: string | null;
   price: number;
-  category_id: string | null;
+  category_id: string | null;  
   image_url: string | null;
   stock_quantity: number;
   is_active: boolean;
   created_at: string;
+  product_type: string | null;
+  is_new: boolean;
+  is_sale: boolean;
+  sale_price: number | null;
+  sizes: string[];
   categories?: { name: string };
 }
 
@@ -96,8 +101,14 @@ export const ProductManager = () => {
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
     const price = parseFloat(formData.get('price') as string);
+    const salePrice = formData.get('salePrice') ? parseFloat(formData.get('salePrice') as string) : null;
     const imageUrl = formData.get('imageUrl') as string;
     const stockQuantity = parseInt(formData.get('stockQuantity') as string);
+    const productType = formData.get('productType') as string;
+    const isNew = formData.get('isNew') === 'on';
+    const isSale = formData.get('isSale') === 'on';
+    const sizesInput = formData.get('sizes') as string;
+    const sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()).filter(s => s) : [];
     
     // Get category ID from form state instead of FormData for Select component
     const categorySelect = (e.currentTarget.querySelector('[name="categoryId"]') as HTMLSelectElement);
@@ -111,9 +122,14 @@ export const ProductManager = () => {
         slug,
         description,
         price,
+        sale_price: salePrice,
         category_id: categoryId || null,
         image_url: imageUrl,
         stock_quantity: stockQuantity,
+        product_type: productType || 'general',
+        is_new: isNew,
+        is_sale: isSale,
+        sizes: sizes,
         is_active: true,
       };
 
@@ -247,6 +263,33 @@ export const ProductManager = () => {
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="salePrice">Sale Price (optional)</Label>
+                  <Input
+                    id="salePrice"
+                    name="salePrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={editingProduct?.sale_price || ''}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="productType">Product Type</Label>
+                  <select
+                    name="productType"
+                    defaultValue={editingProduct?.product_type || 'general'}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="general">General</option>
+                    <option value="men">Men</option>
+                    <option value="women">Women</option>
+                  </select>
+                </div>
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -289,6 +332,16 @@ export const ProductManager = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="sizes">Sizes (comma-separated)</Label>
+                <Input
+                  id="sizes"
+                  name="sizes"
+                  defaultValue={editingProduct?.sizes?.join(', ') || ''}
+                  placeholder="XS, S, M, L, XL"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="imageUrl">Image URL</Label>
                 <Input
                   id="imageUrl"
@@ -297,6 +350,29 @@ export const ProductManager = () => {
                   defaultValue={editingProduct?.image_url || ''}
                   placeholder="https://example.com/image.jpg"
                 />
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isNew"
+                    name="isNew"
+                    defaultChecked={editingProduct?.is_new || false}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="isNew">Mark as New</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isSale"
+                    name="isSale"
+                    defaultChecked={editingProduct?.is_sale || false}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="isSale">Mark as Sale</Label>
+                </div>
               </div>
 
               <Button type="submit" className="w-full">
@@ -331,6 +407,7 @@ export const ProductManager = () => {
               <TableHead>Type</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Stock</TableHead>
+              <TableHead>Tags</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -342,8 +419,26 @@ export const ProductManager = () => {
                     <TableCell className="text-muted-foreground">
                       {product.categories?.name || 'No category'}
                     </TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {product.product_type || 'general'}
+                    </TableCell>
+                    <TableCell>
+                      {product.is_sale && product.sale_price ? (
+                        <div>
+                          <span className="text-red-600 font-semibold">${product.sale_price.toFixed(2)}</span>
+                          <span className="text-muted-foreground line-through ml-2 text-sm">${product.price.toFixed(2)}</span>
+                        </div>
+                      ) : (
+                        <span>${product.price.toFixed(2)}</span>
+                      )}
+                    </TableCell>
                     <TableCell>{product.stock_quantity}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {product.is_new && <Badge variant="secondary">NEW</Badge>}
+                        {product.is_sale && <Badge variant="destructive">SALE</Badge>}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge 
                         variant={product.is_active ? 'default' : 'secondary'}
