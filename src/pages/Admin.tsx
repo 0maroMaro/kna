@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductManager } from '@/components/admin/ProductManager';
 import { CategoryManager } from '@/components/admin/CategoryManager';
-import { LogOut, Settings, Package, FolderOpen } from 'lucide-react';
+import PageManager from '@/components/admin/PageManager';
+import { LogOut, Settings, Package, FolderOpen, FileText } from 'lucide-react';
 
 const Admin = () => {
   const { user, profile, signOut, loading } = useAuth();
@@ -48,7 +49,7 @@ const Admin = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               Products
@@ -56,6 +57,10 @@ const Admin = () => {
             <TabsTrigger value="categories" className="flex items-center gap-2">
               <FolderOpen className="w-4 h-4" />
               Categories
+            </TabsTrigger>
+            <TabsTrigger value="pages" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Pages
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -69,6 +74,10 @@ const Admin = () => {
 
           <TabsContent value="categories" className="mt-6">
             <CategoryManager />
+          </TabsContent>
+
+          <TabsContent value="pages" className="mt-6">
+            <PageManager />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6">
